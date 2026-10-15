@@ -612,7 +612,9 @@
 <body>
 
   <canvas class="sparkle-canvas" id="sparkleCanvas"></canvas>
-  <audio id="audioTrack" preload="auto"></audio>
+  
+  <!-- Continuous Loop Enabled Audio Track -->
+  <audio id="audioTrack" preload="auto" loop></audio>
 
   <!-- Dual Music Controller -->
   <div class="music-bar">
@@ -693,10 +695,12 @@
     const audio = document.getElementById("audioTrack");
 
     audio.src = MUSIC_FILES[1];
+    audio.loop = true;
 
     function playTrack(trackNum) {
       currentTrack = trackNum;
       audio.src = MUSIC_FILES[trackNum];
+      audio.loop = true;
       document.getElementById("btnBgm1").classList.toggle("active", trackNum === 1);
       document.getElementById("btnBgm2").classList.toggle("active", trackNum === 2);
       audio.play().then(() => {
@@ -711,7 +715,10 @@
     }
 
     function togglePlayPause() {
-      if (!audio.src) audio.src = MUSIC_FILES[currentTrack];
+      if (!audio.src) {
+        audio.src = MUSIC_FILES[currentTrack];
+        audio.loop = true;
+      }
       if (isPlaying) {
         audio.pause();
         isPlaying = false;
@@ -936,7 +943,7 @@
       logEvent("Security Answer Attempt", { answer: ans });
       if (ans === 'gadhi') {
         confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
-        playTrack(2); // Auto switch to music2
+        playTrack(2); // Auto switches to Music 2 on loop
         renderCandleStep();
       } else {
         const err = document.getElementById("quizError");
@@ -1138,7 +1145,6 @@
       logEvent("Viewed Letter & Call Page");
     }
 
-    // NEW: "Are you sure?" Consideration Confirmation
     function promptCallConfirmation() {
       logEvent("Call Clicked - Confirmation Shown");
       card.innerHTML = `
