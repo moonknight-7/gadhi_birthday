@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090614;
+      --card-bg: rgba(26, 17, 43, 0.78);
+      --card-border: rgba(244, 114, 182, 0.28);
+      --accent-pink: #f472b6;
+      --accent-purple: #c084fc;
+      --text-main: #fdf4ff;
+      --text-muted: #d8b4fe;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #2f1140 0%, #0d0818 70%, #05030a 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .sparkle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Floating Music Bar */
+    .music-bar {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(14px);
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .music-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      transition: all 0.2s ease;
+    }
+
+    .music-btn.active {
+      background: rgba(244, 114, 182, 0.35);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .secret-trigger {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      opacity: 0.5;
+      transition: opacity 0.2s ease;
+      z-index: 50;
+    }
+    .secret-trigger:hover { opacity: 1; }
+
+    /* Main Container Card */
+    .app-card {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 500px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 30px;
+      padding: 34px 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 50px rgba(244, 114, 182, 0.12);
+      text-align: center;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .step-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-pink);
+      background: rgba(244, 114, 182, 0.12);
+      border: 1px solid rgba(244, 114, 182, 0.25);
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #ffffff 30%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.desc {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 13px 20px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-2px);
+    }
+
+    .countdown-grid {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 22px 0;
+    }
+    .countdown-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 14px;
+      border-radius: 14px;
+      min-width: 65px;
+    }
+    .countdown-num {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent-pink);
+      display: block;
+    }
+    .countdown-label {
+      font-size: 0.68rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .quiz-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f8fafc;
+      padding: 13px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quiz-btn:hover {
+      background: rgba(244, 114, 182, 0.15);
+      border-color: var(--accent-pink);
+      transform: translateX(4px);
+    }
+
+    /* 3D Cake Design */
+    .cake-container {
+      position: relative;
+      margin: 26px auto 18px;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: pointer;
+    }
+
+    .plate {
+      position: absolute;
+      bottom: 0;
+      width: 230px;
+      height: 18px;
+      background: linear-gradient(180deg, #e2e8f0, #94a3b8);
+      border-radius: 50%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6), 0 0 20px rgba(244, 114, 182, 0.3);
+    }
+
+    .cake-tier {
+      position: relative;
+      border-radius: 12px 12px 6px 6px;
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.25), 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .cake-tier.bottom {
+      width: 180px;
+      height: 60px;
+      background: linear-gradient(135deg, #f472b6, #db2777);
+      margin-bottom: 8px;
+      z-index: 2;
+    }
+
+    .cake-tier.top {
+      width: 124px;
+      height: 50px;
+      background: linear-gradient(135deg, #f9a8d4, #ec4899);
+      margin-bottom: -4px;
+      z-index: 3;
+    }
+
+    .drip-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 16px;
+      background: #ffffff;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .drip-layer::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 0;
+      width: 100%;
+      height: 10px;
+      background: radial-gradient(circle at 10px 0, #ffffff 9px, transparent 10px);
+      background-size: 20px 20px;
+    }
+
+    .strawberries {
+      position: absolute;
+      top: -8px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 10px;
+      z-index: 4;
+    }
+    .berry {
+      width: 12px;
+      height: 14px;
+      background: #ef4444;
+      border-radius: 50% 50% 40% 40%;
+    }
+
+    .candle-stick {
+      position: absolute;
+      top: 55px;
+      width: 12px;
+      height: 48px;
+      background: repeating-linear-gradient(45deg, #ffffff, #ffffff 6px, #a855f7 6px, #a855f7 12px);
+      border-radius: 4px;
+      z-index: 5;
+    }
+
+    .candle-wick {
+      position: absolute;
+      top: -7px;
+      left: 5px;
+      width: 2px;
+      height: 8px;
+      background: #334155;
+    }
+
+    .candle-flame {
+      position: absolute;
+      top: -30px;
+      left: -2px;
+      width: 16px;
+      height: 28px;
+      background: radial-gradient(circle at 50% 80%, #ffffff 0%, #fef08a 30%, #f97316 70%, transparent 100%);
+      border-radius: 50% 50% 25% 25%;
+      box-shadow: 0 0 18px #f59e0b, 0 0 35px #f43f5e, 0 0 60px rgba(244, 114, 182, 0.8);
+      animation: flameWiggle 0.9s infinite alternate ease-in-out;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .candle-flame.extinguished {
+      opacity: 0;
+      transform: scale(0.1) translateY(-10px);
+    }
+
+    .smoke {
+      position: absolute;
+      top: -24px;
+      left: 3px;
+      width: 6px;
+      height: 6px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .smoke.active {
+      animation: smokeRise 1.2s ease-out forwards;
+    }
+
+    /* Photo Showcase */
+    .showcase-slider {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      height: 430px;
+      margin: 16px auto 14px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #110b1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: opacity 0.4s ease, transform 0.3s ease;
+      cursor: pointer;
+    }
+    .slide-img:hover {
+      transform: scale(1.02);
+    }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 16px 14px;
+      background: linear-gradient(to top, rgba(10, 5, 20, 0.95) 0%, rgba(10, 5, 20, 0.5) 60%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .caption-title {
+      font-family: 'Caveat', cursive;
+      font-size: 1.45rem;
+      color: #fdf4ff;
+      letter-spacing: 0.5px;
+    }
+
+    .caption-sub {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+      z-index: 5;
+    }
+    .nav-arrow:hover { background: rgba(244, 114, 182, 0.6); }
+    .nav-arrow.prev { left: 10px; }
+    .nav-arrow.next { right: 10px; }
+
+    /* Thumbnails */
+    .thumb-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+    .thumb-item {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0.6;
+    }
+    .thumb-item.active {
+      border-color: var(--accent-pink);
+      opacity: 1;
+      transform: scale(1.08);
+      box-shadow: 0 0 12px rgba(244, 114, 182, 0.6);
+    }
+    .thumb-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 120;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 85vh;
+      border-radius: 14px;
+      box-shadow: 0 0 35px rgba(244, 114, 182, 0.35);
+      object-fit: contain;
+    }
+
+    /* Letter Box */
+    .letter-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 26px 22px;
+      text-align: left;
+      margin: 20px 0 24px;
+      position: relative;
+    }
+    .letter-box::before {
+      content: '“';
+      position: absolute;
+      top: 8px;
+      left: 14px;
+      font-size: 3.5rem;
+      color: var(--accent-pink);
+      opacity: 0.2;
+      font-family: serif;
+    }
+    .letter-box p {
+      font-size: 0.96rem;
+      color: #f1f5f9;
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .letter-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Confirmation Modal / Card */
+    .confirm-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(244, 114, 182, 0.3);
+      border-radius: 20px;
+      padding: 24px 20px;
+      margin: 18px 0;
+      text-align: center;
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .admin-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+    .admin-modal.open { display: flex; }
+    .admin-card {
+      background: #1e1b2e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      max-width: 480px;
+      width: 100%;
+      padding: 24px;
+      text-align: left;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .admin-log-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+
+    @keyframes flameWiggle {
+      0% { transform: scale(1) rotate(-2deg); }
+      50% { transform: scale(1.08, 0.95) rotate(1deg); }
+      100% { transform: scale(0.96, 1.05) rotate(2deg); }
+    }
+    @keyframes smokeRise {
+      0% { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(3); filter: blur(3px); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas class="sparkle-canvas" id="sparkleCanvas"></canvas>
+  <audio id="audioTrack" preload="auto"></audio>
+
+  <!-- Dual Music Controller -->
+  <div class="music-bar">
+    <span style="font-size: 0.9rem;">🎵</span>
+    <button class="music-btn active" id="btnBgm1" onclick="manualSwitchMusic(1)">BGM 1</button>
+    <button class="music-btn" id="btnBgm2" onclick="manualSwitchMusic(2)">BGM 2</button>
+    <button class="music-btn" id="btnPlayPause" onclick="togglePlayPause()">▶ Play</button>
+  </div>
+
+  <!-- Admin Bypass Trigger (3 taps on Cake icon) -->
+  <div class="secret-trigger" onclick="handleSecretTap()">🎂</div>
+
+  <!-- Content Card -->
+  <main class="app-card" id="flowCard"></main>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightboxModal" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="Fullscreen Preview">
+  </div>
+
+  <footer onclick="handleAdminTap()">
+    Crafted with care & respect ✨
+  </footer>
+
+  <!-- Admin Telemetry Modal -->
+  <div class="admin-modal" id="adminModal">
+    <div class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: var(--accent-pink); font-size: 1.1rem;">Session Activity Data</h3>
+        <button class="btn btn-secondary" style="padding: 4px 10px; min-width: auto;" onclick="closeAdminModal()">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px;">Live recorded data on Google Sheet:</p>
+      <div id="adminLogList"></div>
+      <div style="margin-top: 16px; display: flex; gap: 8px;">
+        <button class="btn btn-primary" style="font-size: 0.8rem; padding: 8px;" onclick="exportLogs()">Download JSON</button>
+        <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 8px;" onclick="clearLogs()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // AUDIO, SHEETS, & IMAGE CAPTIONS CONFIG
+    // ==========================================
+    const MUSIC_FILES = {
+      1: "music1.mp3",
+      2: "music2.mp3"
+    };
+
+    const GALLERY_IMAGES = [
+      { 
+        src: "img1.jpg", 
+        title: "Padhaku Gadhi mode on 🤓✨", 
+        sub: "Glasses + cute smile combo" 
+      },
+      { 
+        src: "img2.jpg", 
+        title: "Chhoti si natkhat Sangi 🌸👧", 
+        sub: "Childhood innocent vibes" 
+      },
+      { 
+        src: "img3.jpg", 
+        title: "Pink saree + full swag 🕶️💖", 
+        sub: "Saree and sunglasses look" 
+      },
+      { 
+        src: "img4.jpg", 
+        title: "Traditional grace & jhumkas ✨", 
+        sub: "A timeless, beautiful capture" 
+      }
+    ];
+
+    const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxCZjJl2tcCnZSBKmq7UdCpwYTyaoHWg_Bboqx-baSlRCBYGRuOMrZ_fi5Av5m93SK-ZA/exec";
+
+    let currentTrack = 1;
+    let isPlaying = false;
+    let activePhotoIndex = 0;
+    const audio = document.getElementById("audioTrack");
+
+    audio.src = MUSIC_FILES[1];
+
+    function playTrack(trackNum) {
+      currentTrack = trackNum;
+      audio.src = MUSIC_FILES[trackNum];
+      document.getElementById("btnBgm1").classList.toggle("active", trackNum === 1);
+      document.getElementById("btnBgm2").classList.toggle("active", trackNum === 2);
+      audio.play().then(() => {
+        isPlaying = true;
+        document.getElementById("btnPlayPause").innerText = "⏸ Pause";
+      }).catch(() => {});
+      logEvent("Music Changed", { track: trackNum });
+    }
+
+    function manualSwitchMusic(num) {
+      playTrack(num);
+    }
+
+    function togglePlayPause() {
+      if (!audio.src) audio.src = MUSIC_FILES[currentTrack];
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        document.getElementById("btnPlayPause").innerText = "▶ Play";
+      } else {
+        audio.play().then(() => {
+          isPlaying = true;
+          document.getElementById("btnPlayPause").innerText = "⏸ Pause";
+        }).catch(e => console.log(e));
+      }
+    }
+
+    document.addEventListener("click", function startInitialAudio() {
+      if (!isPlaying && currentTrack === 1) {
+        audio.play().then(() => {
+          isPlaying = true;
+          document.getElementById("btnPlayPause").innerText = "⏸ Pause";
+        }).catch(() => {});
+      }
+      document.removeEventListener("click", startInitialAudio);
+    }, { once: true });
+
+    // ==========================================
+    // LOGGING
+    // ==========================================
+    let eventLogs = JSON.parse(localStorage.getItem("bday_telemetry") || "[]");
+
+    function logEvent(action, meta = {}) {
+      const entry = {
+        timestamp: new Date().toISOString(),
+        timeLocal: new Date().toLocaleTimeString(),
+        action: action,
+        data: meta
+      };
+      eventLogs.push(entry);
+      localStorage.setItem("bday_telemetry", JSON.stringify(eventLogs));
+
+      if (WEBHOOK_URL) {
+        try {
+          fetch(WEBHOOK_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(entry)
+          });
+        } catch (err) {}
+      }
+    }
+
+    // Admin Controls
+    let bypassDateCheck = false;
+    let secretTaps = 0;
+    let adminTaps = 0;
+    let countdownInterval = null;
+
+    function handleSecretTap() {
+      secretTaps++;
+      if (secretTaps >= 3) {
+        bypassDateCheck = true;
+        alert("✨ Admin Mode Activated: Date check bypassed!");
+        renderStep1();
+        secretTaps = 0;
+      }
+    }
+
+    function handleAdminTap() {
+      adminTaps++;
+      if (adminTaps >= 4) {
+        openAdminModal();
+        adminTaps = 0;
+      }
+    }
+
+    function openAdminModal() {
+      const list = document.getElementById("adminLogList");
+      list.innerHTML = eventLogs.length === 0 ? "<div style='color:#94a3b8; font-size:0.85rem;'>No actions recorded yet.</div>" : "";
+      [...eventLogs].reverse().forEach(log => {
+        const item = document.createElement("div");
+        item.className = "admin-log-item";
+        item.innerHTML = `<strong>${log.timeLocal}</strong>: <span style="color:#f472b6;">${log.action}</span> ${Object.keys(log.data).length ? JSON.stringify(log.data) : ''}`;
+        list.appendChild(item);
+      });
+      document.getElementById("adminModal").classList.add("open");
+    }
+
+    function closeAdminModal() {
+      document.getElementById("adminModal").classList.remove("open");
+    }
+
+    function clearLogs() {
+      eventLogs = [];
+      localStorage.removeItem("bday_telemetry");
+      openAdminModal();
+    }
+
+    function exportLogs() {
+      const blob = new Blob([JSON.stringify(eventLogs, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `birthday-telemetry-${Date.now()}.json`;
+      a.click();
+    }
+
+    function isOctober23() {
+      if (bypassDateCheck) return true;
+      const today = new Date();
+      return today.getMonth() === 9 && today.getDate() === 23;
+    }
+
+    function getNextOct23() {
+      const now = new Date();
+      let target = new Date(now.getFullYear(), 9, 23, 0, 0, 0);
+      if (now > target && !(now.getMonth() === 9 && now.getDate() === 23)) {
+        target = new Date(now.getFullYear() + 1, 9, 23, 0, 0, 0);
+      }
+      return target;
+    }
+
+    // ==========================================
+    // MULTI-STEP FLOW
+    // ==========================================
+    const card = document.getElementById("flowCard");
+
+    // Step 1: Birthday Check
+    function renderStep1() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      card.innerHTML = `
+        <div class="step-badge">Question 01</div>
+        <h1>Aaj aapka birthday hai kya? ✨</h1>
+        <p class="desc">Ek honest sa confirmation chahiye bas...</p>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="handleStep1Choice(true)">Haan, bilkul! 🎉</button>
+          <button class="btn btn-secondary" onclick="handleStep1Choice(false)">Nahi toh 🤔</button>
+        </div>
+      `;
+      logEvent("Viewed Step 1");
+    }
+
+    function handleStep1Choice(saidYes) {
+      logEvent("Answered Birthday Status", { saidYes });
+      const bdayToday = isOctober23();
+
+      if (saidYes) {
+        if (bdayToday) {
+          renderSecurityStep();
+        } else {
+          renderCountdownView("Arey! Abhi thoda sabr kijiye ⏳", "Abhi 23 October aane me waqt hai. Sahi waqt pe hi surprise open hoga!");
+        }
+      } else {
+        if (bdayToday) {
+          card.innerHTML = `
+            <div class="step-badge">Caught You! 😂</div>
+            <h1>Jhut bolti ho! 🙈</h1>
+            <p class="desc">Aaj hi to 23rd October hai! Calendar dekh ke aao zara...</p>
+          `;
+          setTimeout(() => {
+            renderSecurityStep();
+          }, 2400);
+        } else {
+          renderCountdownView("Ok! Sach bolne ke liye shukriya ✨", "Fir birthday ke din hi aaiyega! Tab tak timer count kar raha hai:");
+        }
+      }
+    }
+
+    function renderCountdownView(title, message) {
+      card.innerHTML = `
+        <div class="step-badge">Wait for the Day</div>
+        <h1>${title}</h1>
+        <p class="desc">${message}</p>
+        <div class="countdown-grid" id="timerBox">
+          <div class="countdown-item"><span class="countdown-num" id="d">00</span><span class="countdown-label">Days</span></div>
+          <div class="countdown-item"><span class="countdown-num" id="h">00</span><span class="countdown-label">Hours</span></div>
+          <div class="countdown-item"><span class="countdown-num" id="m">00</span><span class="countdown-label">Mins</span></div>
+          <div class="countdown-item"><span class="countdown-num" id="s">00</span><span class="countdown-label">Secs</span></div>
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="btn btn-secondary" onclick="renderStep1()">Back</button>
+        </div>
+      `;
+
+      function update() {
+        const diff = getNextOct23() - new Date();
+        if (diff <= 0) {
+          renderStep1();
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+
+        if (document.getElementById("d")) {
+          document.getElementById("d").innerText = String(days).padStart(2, '0');
+          document.getElementById("h").innerText = String(hours).padStart(2, '0');
+          document.getElementById("m").innerText = String(mins).padStart(2, '0');
+          document.getElementById("s").innerText = String(secs).padStart(2, '0');
+        }
+      }
+      update();
+      countdownInterval = setInterval(update, 1000);
+    }
+
+    // Step 2: Security Check
+    function renderSecurityStep() {
+      card.innerHTML = `
+        <div class="step-badge">Security Verification</div>
+        <h1>Identity Check 🔐</h1>
+        <p class="desc">What do I call you generally? (Bas verify karne ke liye ki aap wahi ho)</p>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkSecurityAnswer('gadhi')">1. Gadhi 🦄</button>
+          <button class="quiz-btn" onclick="checkSecurityAnswer('sangeeta')">2. Sangeeta ✨</button>
+          <button class="quiz-btn" onclick="checkSecurityAnswer('sangi')">3. Sangi 🌸</button>
+          <button class="quiz-btn" onclick="checkSecurityAnswer('kuch nhi')">4. Kuch nahi 🤐</button>
+        </div>
+        <div id="quizError" style="color: #f87171; font-size: 0.88rem; min-height: 20px;"></div>
+      `;
+      logEvent("Viewed Security Question");
+    }
+
+    function checkSecurityAnswer(ans) {
+      logEvent("Security Answer Attempt", { answer: ans });
+      if (ans === 'gadhi') {
+        confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+        playTrack(2); // Auto switch to music2
+        renderCandleStep();
+      } else {
+        const err = document.getElementById("quizError");
+        err.innerText = "Galat jawaab! Itna formal kab se ho gaye? Dobara socho 😂";
+        card.style.animation = "shake 0.4s ease";
+        setTimeout(() => card.style.animation = "", 400);
+      }
+    }
+
+    // Step 3: 3D Cake & Candle Blow
+    function renderCandleStep() {
+      card.innerHTML = `
+        <div class="step-badge">Make a Wish</div>
+        <h1>Blow the Candle 🎂</h1>
+        <p class="desc">Close your eyes, make a silent wish, aur flame par tap karke candle blow kijiye!</p>
+
+        <div class="cake-container" onclick="blowCandle()">
+          <div class="candle-stick">
+            <div class="candle-wick"></div>
+            <div class="candle-flame" id="flame"></div>
+            <div class="smoke" id="smoke"></div>
+          </div>
+
+          <div class="cake-tier top">
+            <div class="strawberries">
+              <div class="berry"></div>
+              <div class="berry"></div>
+              <div class="berry"></div>
+            </div>
+            <div class="drip-layer"></div>
+          </div>
+
+          <div class="cake-tier bottom">
+            <div class="drip-layer"></div>
+          </div>
+
+          <div class="plate"></div>
+        </div>
+
+        <p style="font-size: 0.88rem; color: #cbd5e1; margin-top: 14px;">
+          ✨ Tap the cake to blow the candle ✨
+        </p>
+      `;
+      logEvent("Viewed Cake Scene");
+    }
+
+    function blowCandle() {
+      const flame = document.getElementById("flame");
+      const smoke = document.getElementById("smoke");
+      if (!flame || flame.classList.contains("extinguished")) return;
+
+      flame.classList.add("extinguished");
+      if (smoke) smoke.classList.add("active");
+
+      confetti({
+        particleCount: 130,
+        spread: 90,
+        origin: { y: 0.55 },
+        colors: ['#f472b6', '#c084fc', '#fef08a', '#ffffff', '#38bdf8']
+      });
+
+      logEvent("Candle Blown");
+
+      setTimeout(() => {
+        renderPhotoGalleryStep();
+      }, 1800);
+    }
+
+    // ==========================================
+    // STEP 4: DEDICATED PHOTO SHOWCASE
+    // ==========================================
+    function renderPhotoGalleryStep() {
+      activePhotoIndex = 0;
+      card.innerHTML = `
+        <div class="step-badge">Memories & Moments</div>
+        <h1>Some Beautiful Memories 📸</h1>
+        <p class="desc" style="margin-bottom: 12px;">Har tasveer ki apni ek pyari si memory hai ✨</p>
+
+        <!-- Main Showcase Slider -->
+        <div class="showcase-slider">
+          <button class="nav-arrow prev" onclick="changeSlide(-1)">❮</button>
+          <img id="activeSlideImg" class="slide-img" src="${GALLERY_IMAGES[0].src}" 
+               onerror="this.src='img1.jpg'" 
+               onclick="openLightbox()" alt="Memory">
+          <button class="nav-arrow next" onclick="changeSlide(1)">❯</button>
+          
+          <div class="slide-caption">
+            <div class="caption-title" id="activeSlideCaption">${GALLERY_IMAGES[0].title}</div>
+            <div class="caption-sub">
+              <span id="activeSlideSub">${GALLERY_IMAGES[0].sub}</span>
+              <span style="opacity: 0.75;">🔍 Tap to zoom</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thumbnails Selector -->
+        <div class="thumb-row" id="thumbRow">
+          ${GALLERY_IMAGES.map((img, i) => `
+            <div class="thumb-item ${i === 0 ? 'active' : ''}" onclick="selectSlide(${i})">
+              <img src="${img.src}" onerror="this.src='${img.src}'" alt="Thumb ${i+1}">
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Next Page Button -->
+        <div style="margin-top: 10px;">
+          <button class="btn btn-primary" style="width: 100%;" onclick="renderLetterStep()">
+            Read My Message 💌
+          </button>
+        </div>
+      `;
+      logEvent("Viewed Photo Showcase");
+    }
+
+    function selectSlide(index) {
+      activePhotoIndex = index;
+      updateSlideDisplay();
+      logEvent("Viewed Photo", { index: index + 1 });
+    }
+
+    function changeSlide(direction) {
+      activePhotoIndex += direction;
+      if (activePhotoIndex < 0) activePhotoIndex = GALLERY_IMAGES.length - 1;
+      if (activePhotoIndex >= GALLERY_IMAGES.length) activePhotoIndex = 0;
+      updateSlideDisplay();
+      logEvent("Navigated Photo", { index: activePhotoIndex + 1 });
+    }
+
+    function updateSlideDisplay() {
+      const activeImg = document.getElementById("activeSlideImg");
+      const activeCap = document.getElementById("activeSlideCaption");
+      const activeSub = document.getElementById("activeSlideSub");
+      const thumbs = document.querySelectorAll(".thumb-item");
+
+      if (activeImg && activeCap) {
+        activeImg.style.opacity = "0.2";
+        setTimeout(() => {
+          activeImg.src = GALLERY_IMAGES[activePhotoIndex].src;
+          activeCap.innerText = GALLERY_IMAGES[activePhotoIndex].title;
+          if (activeSub) activeSub.innerText = GALLERY_IMAGES[activePhotoIndex].sub;
+          activeImg.style.opacity = "1";
+        }, 150);
+      }
+
+      thumbs.forEach((thumb, idx) => {
+        thumb.classList.toggle("active", idx === activePhotoIndex);
+      });
+    }
+
+    function openLightbox() {
+      const modal = document.getElementById("lightboxModal");
+      const modalImg = document.getElementById("lightboxImg");
+      modalImg.src = GALLERY_IMAGES[activePhotoIndex].src;
+      modal.classList.add("active");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightboxModal").classList.remove("active");
+    }
+
+    // ==========================================
+    // STEP 5: LETTER & CALL CONFIRMATION FLOW
+    // ==========================================
+    function renderLetterStep() {
+      card.innerHTML = `
+        <div class="step-badge">From The Heart</div>
+        <h1>Happy Birthday, Gadhi! ✨</h1>
+        <p class="desc">Bina kisi formalities ya demands ke, ek genuine wish...</p>
+
+        <!-- Sincere Note Box -->
+        <div class="letter-box">
+          <p>
+            Main jaanta hoon ki meri kuch galtiyon aur harkato ki wajah se tum mujhse kaafi naraz ho, aur shayad tum mujhe bilkul pasand nahi karti. Us baat ka mujhe genuinely dil se regret hai.
+          </p>
+          <p>
+            Lekin aaj tumhara special day hai. Main bas bina kisi awkwardness ya bina kisi expectation ke tumhe ek warm birthday wish dena chahta tha.
+          </p>
+          <p>
+            May this year bring you extreme peace, laughter, good health, aur wo sab jo tum deserve karti ho. Always stay happy!
+          </p>
+        </div>
+
+        <!-- Call Step -->
+        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12);">
+          <h2 style="font-size: 1.15rem; margin-bottom: 8px;">If you are comfortable to talk...</h2>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 18px;">Zero pressure, bilkul tumhari marzi par depend karta hai.</p>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="promptCallConfirmation()">Call Now 📞</button>
+            <button class="btn btn-secondary" onclick="handleDeclineCall()">Rahne dete h 🤍</button>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px; min-width: auto;" onclick="renderPhotoGalleryStep()">
+            ← Back to Photos
+          </button>
+        </div>
+      `;
+      logEvent("Viewed Letter & Call Page");
+    }
+
+    // NEW: "Are you sure?" Consideration Confirmation
+    function promptCallConfirmation() {
+      logEvent("Call Clicked - Confirmation Shown");
+      card.innerHTML = `
+        <div class="step-badge">Just Making Sure 🤍</div>
+        <h1>Are you sure?</h1>
+        
+        <div class="confirm-card">
+          <p style="font-size: 1rem; color: #fdf4ff; line-height: 1.7; margin-bottom: 8px;">
+            "Aaj aapka special day hai, aur main use bilkul barbaad nahi karna chahta."
+          </p>
+          <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
+            Agar aap sach me dil se baat karne me comfortable ho, tabhi aage badhein. Koi obligation ya awkwardness nahi hai.
+          </p>
+        </div>
+
+        <div class="btn-group" style="margin-top: 22px;">
+          <button class="btn btn-primary" onclick="proceedToCall()">Haan, sure hoon 📞</button>
+          <button class="btn btn-secondary" onclick="handleDeclineCall()">Rehne dete hain 🤍</button>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <button class="btn btn-secondary" style="font-size: 0.82rem; padding: 6px 14px; min-width: auto;" onclick="renderLetterStep()">
+            ← Wapas Message Dekhein
+          </button>
+        </div>
+      `;
+    }
+
+    function proceedToCall() {
+      logEvent("Call Confirmed by User", { action: "dialed_7004875135" });
+      window.location.href = "tel:7004875135";
+    }
+
+    function handleDeclineCall() {
+      logEvent("Call Declined / Respect Space", { wantsCall: false });
+      card.innerHTML = `
+        <div class="step-badge">Understood Completely</div>
+        <h1>Completely Fine 🤍</h1>
+        <p class="desc" style="margin-top: 14px;">
+          I totally respect your space and comfort. Koi baat nahi, tumhara din bohot special ho. Enjoy your day to the fullest! ✨
+        </p>
+        <div style="margin-top: 24px;">
+          <button class="btn btn-secondary" onclick="renderLetterStep()">Back to Message</button>
+        </div>
+      `;
+    }
+
+    // Sparkles Background
+    const canvas = document.getElementById("sparkleCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.8;
+        this.alpha = Math.random() * 0.7 + 0.2;
+        this.speedY = -(Math.random() * 0.4 + 0.1);
+        this.speedX = (Math.random() - 0.5) * 0.3;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(244, 114, 182, ${this.alpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 45; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateSparkles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateSparkles);
+    }
+    animateSparkles();
+
+    // Start Flow
+    renderStep1();
+  </script>
+</body>
+</html>
